@@ -1,0 +1,15 @@
+python-dotenv
+opencv-python
+scikit-learn
+pandas
+numpy
+seaborn
+pillow
+scipy
+albumentations
+tqdm
+fiftyone
+medmnist
+streamlit
+ttach
+grad-cam
