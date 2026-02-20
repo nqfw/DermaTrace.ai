@@ -12,7 +12,7 @@ def process_image(img, threshold=15.0, max_texture=300):
     # 1. Standard YCrCb skin color detection
     ycbcr = cv2.cvtColor(img, cv2.COLOR_BGR2YCrCb)
     lower_skin_ycbcr = np.array([0, 133, 77], dtype=np.uint8)
-    upper_skin_ycbcr = np.array([255, 173, 127], dtype=np.uint8)
+    upper_skin_ycbcr = np.array([255, 195, 175], dtype=np.uint8)
     mask = cv2.inRange(ycbcr, lower_skin_ycbcr, upper_skin_ycbcr)
 
     # Skin coverage
