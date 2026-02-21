@@ -7,6 +7,7 @@ import sys
 import cv2
 import numpy as np
 import random
+import matplotlib.pyplot as plt
 
 sys.path.append(r"C:\Users\lenovo\OneDrive\Desktop\HACKATHON\models")
 from model import get_resnet50_model
@@ -19,7 +20,7 @@ from skintone import estimate_skin_tone
 
 # 1. Configuration
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-MODEL_WEIGHTS = r"C:\Users\lenovo\OneDrive\Desktop\HACKATHON\models\melanoma_finetuned.pth"
+MODEL_WEIGHTS = r"C:\Users\lenovo\OneDrive\Desktop\HACKATHON\models\fitzpatrick_weights.pth"
 DATA_DIR = r"C:\Users\lenovo\OneDrive\Desktop\HACKATHON\data\fitz_ham10000_subset"
 
 # Testing ALL tones this time, with 200 random samples total
@@ -61,6 +62,9 @@ def evaluate_tone_bias():
         
     model = model.to(DEVICE)
     model.eval()
+    
+    # For ResNet50 Grad-CAM, target the final convolutional layer
+    target_layer = model.layer4[-1]
     
     # Gather ALL images from ALL tone folders
     all_images = []
@@ -139,6 +143,32 @@ def evaluate_tone_bias():
             # Print Every 10th image to save terminal space, OR if MST flops massively
             if i % 10 == 0 or mst_status == "FLOP":
                 print(f"{i:3d}/200 | AI: {status_str:10s} (Top1:{pred1_label.upper():5s} Top2:{pred2_label.upper():5s} A:{actual_label.upper():5s}) | Tone: {mst_status:7s} (P:{pred_tone} A:{actual_tone})")
+            
+            # 8. Plot exactly 10 visual examples per tone to avoid overwhelming the user
+            if i < 10:
+                cam_overlay = generate_cam(model, target_layer, input_tensor, clean_img)
+                
+                fig, axs = plt.subplots(1, 3, figsize=(15, 5))
+                fig.canvas.manager.set_window_title(f"Image {i+1} | Skin Tone {actual_tone} - Actual: {actual_label.upper()} => Pred: {pred1_label.upper()}")
+                
+                # Original
+                axs[0].imshow(cv2.cvtColor(cropped_img, cv2.COLOR_BGR2RGB))
+                axs[0].set_title(f"1. Center Cropped Original ({actual_label.upper()})")
+                axs[0].axis('off')
+                
+                # DullRazor
+                axs[1].imshow(cv2.cvtColor(clean_img, cv2.COLOR_BGR2RGB))
+                axs[1].set_title("2. DullRazor Cleaned")
+                axs[1].axis('off')
+                
+                # Grad-CAM
+                axs[2].imshow(cv2.cvtColor(cam_overlay, cv2.COLOR_BGR2RGB))
+                axs[2].set_title(f"3. Grad-CAM (Pred: {pred1_label.upper()})")
+                axs[2].axis('off')
+                
+                plt.show(block=False)
+                plt.pause(2) # Keep it open briefly or let user close it, wait let's just make it block so user sees them as a stack or loop over 10.
+                plt.close(fig)
             
         except Exception as e:
             print(f"  Error processing {img_data['name']}: {e}")

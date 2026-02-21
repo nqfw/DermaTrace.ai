@@ -85,9 +85,9 @@ if __name__ == "__main__":
 
         images = glob.glob(os.path.join(path, "*.jpg"))
         
-        # Test exactly 1000 images
-        sample_size = min(1000, len(images))
-        print(f"\n--- Model Blind Test ({sample_size} random images) ---")
+        # Test exactly the first 500 images
+        sample_size = min(500, len(images))
+        print(f"\n--- Model Sequential Test (First {sample_size} images) ---")
         
         from sklearn.metrics import f1_score
         
@@ -96,7 +96,8 @@ if __name__ == "__main__":
         all_true = []
         all_pred = []
         
-        for img_path in random.sample(images, sample_size):
+        # Taking the first 500 instead of a random sample
+        for img_path in images[:sample_size]:
             img_id = os.path.splitext(os.path.basename(img_path))[0]
             true_label = "unknown"
             if df is not None:
