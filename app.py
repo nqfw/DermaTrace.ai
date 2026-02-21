@@ -6,6 +6,7 @@ import numpy as np
 import torchvision.transforms as transforms
 from PIL import Image
 import sys
+import pandas as pd
 
 # Add local paths for modules
 sys.path.append(os.path.join(os.getcwd(), "core"))
@@ -59,6 +60,28 @@ def preprocess_for_model(img_bgr):
         transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
     ])
     return transform(img_rgb).unsqueeze(0).to(DEVICE)
+
+@st.cache_data
+def load_metadata():
+    csv_path = r"C:\Users\lenovo\OneDrive\Desktop\HACKATHON\data\HAM10000 dataset\HAM10000_metadata.csv"
+    if os.path.exists(csv_path):
+        return pd.read_csv(csv_path)
+    return None
+
+def resolve_actual_diagnosis(filename, df_metadata):
+    # 1. Check for Fitzpatrick naming convention (e.g., "mel_0a7d...")
+    possible_prefix = filename.split('_')[0].lower()
+    if possible_prefix in CLASS_MAP.values():
+        return possible_prefix.upper()
+    
+    # 2. Check HAM10000 CSV (e.g., "ISIC_0024306")
+    img_id = os.path.splitext(filename)[0]
+    if df_metadata is not None:
+        match = df_metadata.loc[df_metadata['image_id'] == img_id, 'dx']
+        if not match.empty:
+            return match.values[0].upper()
+            
+    return "UNKNOWN"
 
 # --- UI Setup ---
 st.set_page_config(page_title="DermaTrace.ai", layout="wide", page_icon="🔬")
@@ -132,8 +155,9 @@ with st.sidebar:
     st.markdown("---")
     st.subheader("📊 Ground Truth")
     actual_label_name = st.selectbox(
-        "For Evaluation Comparison",
-        ["Unknown"] + list(FULL_NAMES.values())
+        "Label for Comparison",
+        ["Auto-Detect (Filename/CSV)"] + list(FULL_NAMES.values()),
+        help="If Auto-Detect is on, the system will try to find the label in the filename or metadata CSV."
     )
     
     st.markdown("---")
@@ -155,6 +179,7 @@ else:
 
 model = load_model(weights_path)
 target_layer = model.layer4[-1]
+df_metadata = load_metadata()
 
 # --- Main Page Layout ---
 st.title("DermaTrace.ai")
@@ -175,7 +200,13 @@ if uploaded_file is not None:
         
     if proceed:
         # 3. Pipeline Execution
-        cropped = center_crop_image(image)
+        if model_choice:
+            # Fitzpatrick images often have heavy surrounds, so we crop to the center
+            cropped = center_crop_image(image)
+        else:
+            # HAM10000 images are clinical patches; we resize the full frame to avoid losing data
+            cropped = cv2.resize(image, (224, 224))
+            
         cleaned = apply_dullrazor(cropped)
         mst_score = estimate_skin_tone(image)
         
@@ -192,23 +223,25 @@ if uploaded_file is not None:
         p2_name = CLASS_MAP[p2_idx].upper()
         conf = top_probs[0][0].item() * 100
         
-        # Actual mapping
-        actual_val = "N/A"
-        if actual_label_name != "Unknown":
+        # 4. Resolve Actual Diagnosis
+        auto_val = resolve_actual_diagnosis(uploaded_file.name, df_metadata)
+        
+        if actual_label_name == "Auto-Detect (Filename/CSV)":
+            actual_val = auto_val
+            match_source = "Auto"
+        else:
+            # Manual selection override
             inv_names = {v: k for k, v in FULL_NAMES.items()}
             actual_val = inv_names[actual_label_name].upper()
+            match_source = "Manual"
             
         # --- Top Metrics Bar ---
         st.markdown("---")
         m1, m2, m3, m4 = st.columns(4)
-        with m1:
-            st.metric("Predicted", p1_name)
-        with m2:
-            st.metric("Actual", actual_val)
-        with m3:
-            st.metric("Conf.", f"{conf:.1f}%")
-        with m4:
-            st.metric("Top-2 Benchmark", benchmark_top2)
+        m1.metric("Predicted", p1_name)
+        m2.metric("Actual", f"{actual_val} ({match_source})")
+        m3.metric("Conf.", f"{conf:.1f}%")
+        m4.metric("Top-2 Eval", benchmark_top2)
             
         st.markdown("---")
         
