@@ -19,11 +19,12 @@ def audit_image(image_path):
     # 2. Apply DullRazor
     img_dullrazor = apply_dullrazor(img)
 
-    # 3. Apply Skin Detection (on the DullRazor output)
-    is_skin, pct, mask = process_image(img_dullrazor)
+    # 3. Detect Skin on the cleaned image
+    # Note: process_image now returns (is_skin, pct, skin_mask, has_lesion)
+    is_skin, pct, skin_mask, has_lesion = process_image(img_dullrazor)
     
     # Convert mask to 3 channels so we can stack it horizontally with the colored images
-    mask_bgr = cv2.cvtColor(mask, cv2.COLOR_GRAY2BGR)
+    mask_bgr = cv2.cvtColor(skin_mask, cv2.COLOR_GRAY2BGR)
     
     # 4. Create Side-by-Side Visualization
     # [Original | DullRazor | Skin Mask]
