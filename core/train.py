@@ -35,6 +35,16 @@ class HAM10000Dataset(Dataset):
     def __len__(self):
         return len(self.df)
 
+    def center_crop_image(self, img, crop_size=224):
+        """Replicates evaluating center crop identically."""
+        h, w = img.shape[:2]
+        if h <= crop_size or w <= crop_size:
+            return cv2.resize(img, (crop_size, crop_size))
+            
+        start_y = h//2 - crop_size//2
+        start_x = w//2 - crop_size//2
+        return img[start_y:start_y+crop_size, start_x:start_x+crop_size]
+
     def __getitem__(self, idx):
         # Gracefully handle missing images in our partial dataset
         while True:
@@ -50,11 +60,16 @@ class HAM10000Dataset(Dataset):
             # If missing, just grab the next random index so training doesn't crash
             idx = (idx + 1) % len(self.df)
             
+        # Soft resize for base speed before cropping
+        image = cv2.resize(image, (400, 300))
+        
+        # Apply Custom Center Crop
+        image = self.center_crop_image(image)
+        
+        # Apply DullRazor
+        image = apply_dullrazor(image)
+        
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        # Temporarily removing DullRazor from the live training loop because 
-        # doing heavy morphological math on the CPU for every frame causes a massive bottleneck.
-        # Ideally, we would pre-process the entire dataset once offline.
-        # image = apply_dullrazor(image)
         
         # 4. Grab Label
         label_str = self.df.loc[idx, 'dx']
@@ -100,6 +115,11 @@ def train_model(epochs=3, batch_size=1, experimental_limit=1):
     # 4. Load Model
     print("Loading Pretrained ResNet50...")
     model, _ = get_resnet50_model(num_classes=7)
+    
+    # 5. Unfreeze Architecture
+    for param in model.parameters():
+        param.requires_grad = True
+        
     model = model.to(device)
     
     # 5. Setup Weighted Loss function
@@ -108,7 +128,8 @@ def train_model(epochs=3, batch_size=1, experimental_limit=1):
     class_weights = torch.tensor([1.0, 2.0, 1.0, 2.0, 1.0, 1.0, 1.0]).to(device)
     criterion = nn.CrossEntropyLoss(weight=class_weights)
     
-    optimizer = optim.Adam(model.parameters(), lr=0.0001)
+    # Lower learning rate since network is fully unfrozen
+    optimizer = optim.Adam(model.parameters(), lr=0.0001, weight_decay=1e-4)
     
     # 6. Training Loop Setup
     os.makedirs(r"C:\Users\lenovo\OneDrive\Desktop\HACKATHON\models", exist_ok=True)

@@ -27,7 +27,10 @@ def apply_dullrazor(img):
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (17, 17))
     blackhat = cv2.morphologyEx(gray, cv2.MORPH_BLACKHAT, kernel)
-    _, hair_mask = cv2.threshold(blackhat, 10, 255, cv2.THRESH_BINARY)
+    
+    # INCREASED THRESHOLD: 10 was too aggressive and captured red lesion patches and skin borders. 
+    # Raising to 50 ensures it only captures very distinct, high-contrast dark hairs.
+    _, hair_mask = cv2.threshold(blackhat, 50, 255, cv2.THRESH_BINARY)
     
     # 2. Ruler Removal (User's Blue Mask)
     ruler_mask = create_blue_mask(img)
