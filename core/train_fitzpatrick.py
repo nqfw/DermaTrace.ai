@@ -116,13 +116,17 @@ def train_fitzpatrick():
     # preventing the dataloader queue from timing out.
     dataloader = DataLoader(dataset, batch_size=16, shuffle=True, num_workers=0)
     
-    # 4. Initialize Model with Pre-Existing HAM10000 Weights (User Requested)
+    # 4. Initialize Model (Prioritizing Resume from current Fitzpatrick weights)
     model, _ = get_resnet50_model(num_classes=7)
-    if os.path.exists(base_ham10000_weights):
-        print(f"Loading Base HAM10000 64% accuracy weights from {base_ham10000_weights}")
+    
+    if os.path.exists(save_path):
+        print(f"RESUMING: Loading current best Fitzpatrick weights (Loss: 1.1) from {save_path}")
+        model.load_state_dict(torch.load(save_path, map_location=device))
+    elif os.path.exists(base_ham10000_weights):
+        print(f"STARTING FRESH: Loading Base HAM10000 weights from {base_ham10000_weights}")
         model.load_state_dict(torch.load(base_ham10000_weights, map_location=device))
     else:
-        print("WARNING: Base HAM10000 weights not found, starting from pure ImageNet.")
+        print("WARNING: No weights found. Starting from ImageNet defaults.")
         
     # 5. Unfreeze Architecture (User Requested)
     for param in model.parameters():
