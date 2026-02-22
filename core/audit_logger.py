@@ -5,7 +5,8 @@ import shutil
 from datetime import datetime
 
 # ─── Config ───────────────────────────────────────────────────────────────────
-OUTPUT_DIR = r"C:\Users\lenovo\OneDrive\Desktop\HACKATHON\output\audit_uploads"
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+OUTPUT_DIR = os.path.join(BASE_DIR, "output", "audit_uploads")
 LOG_FILE   = os.path.join(OUTPUT_DIR, "audit_log.json")
 
 os.makedirs(OUTPUT_DIR, exist_ok=True)

@@ -34,13 +34,15 @@ cv2.setLogLevel(0)
 
 # ─── Config ────────────────────────────────────────────────────────────────────
 DEVICE      = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-WEIGHTS_IN  = r"C:\Users\lenovo\OneDrive\Desktop\HACKATHON\models\melanoma_finetuned.pth"
-WEIGHTS_OUT = r"C:\Users\lenovo\OneDrive\Desktop\HACKATHON\models\melanoma_finetuned.pth"  # Overwrite best
-CKPT_PATH   = r"C:\Users\lenovo\OneDrive\Desktop\HACKATHON\models\ham_retrain_latest.pth"
-CSV_PATH    = r"C:\Users\lenovo\OneDrive\Desktop\HACKATHON\data\HAM10000 dataset\HAM10000_metadata.csv"
+BASE_DIR    = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+WEIGHTS_IN  = os.path.join(BASE_DIR, "models", "melanoma_finetuned.pth")
+WEIGHTS_OUT = os.path.join(BASE_DIR, "models", "melanoma_finetuned.pth")  # Overwrite best
+CKPT_PATH   = os.path.join(BASE_DIR, "models", "ham_retrain_latest.pth")
+CSV_PATH    = os.path.join(BASE_DIR, "data", "HAM10000 dataset", "HAM10000_metadata.csv")
 IMG_DIRS    = [
-    r"C:\Users\lenovo\OneDrive\Desktop\HACKATHON\data\HAM10000 dataset\HAM10000_images_part_1",
-    r"C:\Users\lenovo\OneDrive\Desktop\HACKATHON\data\HAM10000 dataset\HAM10000_images_part_2",
+    os.path.join(BASE_DIR, "data", "HAM10000 dataset", "HAM10000_images_part_1"),
+    os.path.join(BASE_DIR, "data", "HAM10000 dataset", "HAM10000_images_part_2"),
 ]
 
 CLASS_TO_IDX = {'nv': 0, 'mel': 1, 'bkl': 2, 'bcc': 3, 'akiec': 4, 'vasc': 5, 'df': 6}

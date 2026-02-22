@@ -15,7 +15,8 @@ import time
 import fiftyone as fo
 
 # ─── Config ───────────────────────────────────────────────────────────────────
-LOG_FILE = r"C:\Users\lenovo\OneDrive\Desktop\HACKATHON\output\audit_uploads\audit_log.json"
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+LOG_FILE = os.path.join(BASE_DIR, "output", "audit_uploads", "audit_log.json")
 DATASET_NAME = "DermaTrace_Live_Audit"
 
 # ─── Main Logic ───────────────────────────────────────────────────────────────

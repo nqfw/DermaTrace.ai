@@ -1,17 +1,22 @@
 import cv2
 import numpy as np
 import os
+import shutil
 import glob
 
-search_dirs = [
-    r"C:\Users\lenovo\OneDrive\Desktop\HACKATHON\data\HAM10000 dataset\HAM10000_images_part_1",
-    r"C:\Users\lenovo\OneDrive\Desktop\HACKATHON\data\raw",
-    r"C:\Users\lenovo\OneDrive\Desktop\HACKATHON\test images"
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+TARGET_DIRS = [
+    os.path.join(BASE_DIR, "data", "HAM10000 dataset", "HAM10000_images_part_1"),
+    os.path.join(BASE_DIR, "data", "raw"),
+    os.path.join(BASE_DIR, "test images")
 ]
+
+RULER_OUTPUT_DIR = os.path.join(BASE_DIR, "research", "ruler_remover", "rulers_found")
+NON_RULER_OUTPUT_DIR = os.path.join(BASE_DIR, "research", "ruler_remover", "no_rulers")
 
 results = []
 
-for d in search_dirs:
+for d in TARGET_DIRS:
     if not os.path.exists(d): continue
     for f in glob.glob(os.path.join(d, "*.jpg")):
         img = cv2.imread(f)

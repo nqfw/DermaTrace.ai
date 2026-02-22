@@ -95,9 +95,10 @@ def train_fitzpatrick():
         torch.backends.cudnn.benchmark = True # Optimizes underlying hardware algorithms to prevent throttling
     
     # Paths
-    data_dir = r"C:\Users\lenovo\OneDrive\Desktop\HACKATHON\data\fitz_ham10000_subset"
-    base_ham10000_weights = r"C:\Users\lenovo\OneDrive\Desktop\HACKATHON\models\melanoma_finetuned.pth"
-    save_path = r"C:\Users\lenovo\OneDrive\Desktop\HACKATHON\models\fitzpatrick_weights.pth"
+    BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    data_dir = os.path.join(BASE_DIR, "data", "fitz_ham10000_subset")
+    base_ham10000_weights = os.path.join(BASE_DIR, "models", "melanoma_finetuned.pth")
+    save_path = os.path.join(BASE_DIR, "models", "fitzpatrick_weights.pth")
     
     # 2. PyTorch Transform (Needs Data Augmentations so it doesn't just memorize the small Fitzpatrick dataset)
     train_transform = transforms.Compose([

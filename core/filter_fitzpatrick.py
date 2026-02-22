@@ -5,7 +5,8 @@ import requests
 
 # 1. Configuration
 FITZPATRICK_CSV_URL = "https://raw.githubusercontent.com/mattgroh/fitzpatrick17k/main/fitzpatrick17k.csv"
-DATA_DIR = r"C:\Users\lenovo\OneDrive\Desktop\HACKATHON\data"
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DATA_DIR = os.path.join(BASE_DIR, "data")
 CSV_PATH = os.path.join(DATA_DIR, "fitzpatrick17k.csv")
 SOURCE_DIR = os.path.join(DATA_DIR, "organized_fitzpatrick")
 DEST_DIR = os.path.join(DATA_DIR, "fitz_ham10000_subset")

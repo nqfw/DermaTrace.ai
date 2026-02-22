@@ -25,15 +25,16 @@ from core.dullrazor import apply_dullrazor
 
 # ─── Config ────────────────────────────────────────────────────────────────────
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-HAM_WEIGHTS  = r"C:\Users\lenovo\OneDrive\Desktop\HACKATHON\models\melanoma_finetuned.pth"
-FITZ_WEIGHTS = r"C:\Users\lenovo\OneDrive\Desktop\HACKATHON\models\fitzpatrick_weights.pth"
+HAM_WEIGHTS  = os.path.join(BASE_DIR, "models", "melanoma_finetuned.pth")
+FITZ_WEIGHTS = os.path.join(BASE_DIR, "models", "fitzpatrick_weights.pth")
 HAM_IMG_DIRS = [
-    r"C:\Users\lenovo\OneDrive\Desktop\HACKATHON\data\HAM10000 dataset\HAM10000_images_part_1",
-    r"C:\Users\lenovo\OneDrive\Desktop\HACKATHON\data\HAM10000 dataset\HAM10000_images_part_2",
+    os.path.join(BASE_DIR, "data", "HAM10000 dataset", "HAM10000_images_part_1"),
+    os.path.join(BASE_DIR, "data", "HAM10000 dataset", "HAM10000_images_part_2"),
 ]
-HAM_CSV      = r"C:\Users\lenovo\OneDrive\Desktop\HACKATHON\data\HAM10000 dataset\HAM10000_metadata.csv"
-FITZ_TONE5   = r"C:\Users\lenovo\OneDrive\Desktop\HACKATHON\data\fitz_ham10000_subset\5"
+HAM_CSV      = os.path.join(BASE_DIR, "data", "HAM10000 dataset", "HAM10000_metadata.csv")
+FITZ_TONE5   = os.path.join(BASE_DIR, "data", "fitz_ham10000_subset", "5")
 
 CLASS_TO_IDX = {'nv': 0, 'mel': 1, 'bkl': 2, 'bcc': 3, 'akiec': 4, 'vasc': 5, 'df': 6}
 IDX_TO_CLASS = {v: k for k, v in CLASS_TO_IDX.items()}
