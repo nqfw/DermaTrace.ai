@@ -164,7 +164,6 @@ st.markdown("""
 
 # --- Sidebar ---
 with st.sidebar:
-    st.image("https://cdn-icons-png.flaticon.com/512/2861/2861445.png", width=50)
     st.title("DermaTrace.ai")
     st.markdown("---")
     
