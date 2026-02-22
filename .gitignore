@@ -17,6 +17,10 @@ raw_data/
 *.png
 *.zip
 
+# Exceptions (Allow demo images and UI assets)
+!test images/
+!images/
+
 # --- Jupyter Notebooks & Caches ---
 .ipynb_checkpoints
 .pytest_cache/
