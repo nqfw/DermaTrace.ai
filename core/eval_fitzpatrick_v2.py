@@ -25,15 +25,17 @@ from core.gradcam_engine import generate_cam
 
 # ─── Config ────────────────────────────────────────────────────────────────────
 DEVICE       = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-WEIGHTS_PATH = r"C:\Users\lenovo\OneDrive\Desktop\HACKATHON\models\fitzpatrick_weights.pth"
-DATA_DIR     = r"C:\Users\lenovo\OneDrive\Desktop\HACKATHON\data\fitz_ham10000_subset"
-HEATMAP_DIR  = r"C:\Users\lenovo\OneDrive\Desktop\HACKATHON\output\fitz_heatmaps_v2"
+BASE_DIR     = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+WEIGHTS_PATH = os.path.join(BASE_DIR, "models", "fitzpatrick_weights.pth")
+DATA_DIR     = os.path.join(BASE_DIR, "data", "fitz_ham10000_subset")
+HEATMAP_DIR  = os.path.join(BASE_DIR, "output", "fitz_heatmaps_v2")
+os.makedirs(HEATMAP_DIR, exist_ok=True)
 EVAL_LIMIT   = 500
 HEATMAP_LIMIT = 20
 
 CLASS_TO_IDX = {'nv': 0, 'mel': 1, 'bkl': 2, 'bcc': 3, 'akiec': 4, 'vasc': 5, 'df': 6}
 IDX_TO_CLASS = {v: k for k, v in CLASS_TO_IDX.items()}
-os.makedirs(HEATMAP_DIR, exist_ok=True)
+
 
 TRANSFORM = transforms.Compose([
     transforms.ToPILImage(),

@@ -43,6 +43,7 @@ session = start_fiftyone_server()
 
 # --- Configuration ---
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 CLASS_MAP = {0: 'nv', 1: 'mel', 2: 'bkl', 3: 'bcc', 4: 'akiec', 5: 'vasc', 6: 'df'}
 FULL_NAMES = {
     'nv': 'Melanocytic Nevi (Mole)',
@@ -85,7 +86,7 @@ def preprocess_for_model(img_bgr):
 
 @st.cache_data
 def load_metadata():
-    csv_path = r"C:\Users\lenovo\OneDrive\Desktop\HACKATHON\data\HAM10000 dataset\HAM10000_metadata.csv"
+    csv_path = os.path.join(BASE_DIR, "data", "HAM10000 dataset", "HAM10000_metadata.csv")
     if os.path.exists(csv_path):
         return pd.read_csv(csv_path)
     return None
@@ -196,12 +197,12 @@ with st.sidebar:
 
 # --- Logic for Model Path ---
 if not model_choice:
-    weights_path = r"C:\Users\lenovo\OneDrive\Desktop\HACKATHON\models\melanoma_finetuned.pth"
+    weights_path = os.path.join(BASE_DIR, "models", "melanoma_finetuned.pth")
     benchmark_top1 = "68.0%"
     benchmark_top2 = "77.8%"
     desc = "High-fidelity base model."
 else:
-    weights_path = r"C:\Users\lenovo\OneDrive\Desktop\HACKATHON\models\fitzpatrick_weights.pth"
+    weights_path = os.path.join(BASE_DIR, "models", "fitzpatrick_weights.pth")
     benchmark_top1 = "41.0%"
     benchmark_top2 = "57.5%"
     desc = "Tone-aware bias-corrected engine."

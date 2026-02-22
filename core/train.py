@@ -90,8 +90,8 @@ def train_model(epochs=3, batch_size=1, experimental_limit=1):
     if device.type == 'cuda':
         print(f"GPU Name: {torch.cuda.get_device_name(0)}")
         torch.backends.cudnn.benchmark = True # Optimizes GPU hardware algorithms
-        
-    base_dir = r"C:\Users\lenovo\OneDrive\Desktop\HACKATHON\data\HAM10000 dataset"
+    BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    base_dir = os.path.join(BASE_DIR, "data", "HAM10000 dataset")
     metadata_path = os.path.join(base_dir, "HAM10000_metadata.csv")
     img_dir = os.path.join(base_dir, "HAM10000_images_part_1")
     
@@ -132,7 +132,9 @@ def train_model(epochs=3, batch_size=1, experimental_limit=1):
     optimizer = optim.Adam(model.parameters(), lr=0.0001, weight_decay=1e-4)
     
     # 6. Training Loop Setup
-    os.makedirs(r"C:\Users\lenovo\OneDrive\Desktop\HACKATHON\models", exist_ok=True)
+    print("\nInitializing model...")
+    model_dir = os.path.join(BASE_DIR, "models")
+    os.makedirs(model_dir, exist_ok=True)
     best_loss = float('inf')
     
     # Reverse mapping for console output
@@ -171,7 +173,7 @@ def train_model(epochs=3, batch_size=1, experimental_limit=1):
             
             # Dynamic mid-epoch Checkpointing (Save progress in case of crash)
             if batch_idx > 0 and batch_idx % 500 == 0:
-                ckpt_path = r"C:\Users\lenovo\OneDrive\Desktop\HACKATHON\models\latest_checkpoint.pth"
+                ckpt_path = os.path.join(model_dir, "latest_checkpoint.pth")
                 torch.save({'epoch': epoch, 'batch': batch_idx, 'model': model.state_dict()}, ckpt_path)
                 
         progress_bar.close()
@@ -182,7 +184,7 @@ def train_model(epochs=3, batch_size=1, experimental_limit=1):
         # Checkpoint Best Model
         if epoch_loss < best_loss:
             best_loss = epoch_loss
-            save_path = r"C:\Users\lenovo\OneDrive\Desktop\HACKATHON\models\melanoma_finetuned.pth"
+            save_path = os.path.join(model_dir, "melanoma_finetuned.pth")
             torch.save(model.state_dict(), save_path)
             print(f"--> Saved best model to {save_path}")
 

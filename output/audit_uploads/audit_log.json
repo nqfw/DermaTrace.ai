@@ -75,5 +75,49 @@
         "confidence": 60.21,
         "mst_tone": "7",
         "model_used": "Clinical (HAM10000)"
+    },
+    {
+        "timestamp": "2026-02-22T15:48:22.963021",
+        "filepath": "C:\\Users\\lenovo\\OneDrive\\Desktop\\HACKATHON\\output\\audit_uploads\\1771755502_gettyimages-594838391-612x612.jpg",
+        "original_filename": "gettyimages-594838391-612x612.jpg",
+        "true_label": "unknown",
+        "pred1": "nv",
+        "pred2": "mel",
+        "confidence": 54.66,
+        "mst_tone": "4",
+        "model_used": "Clinical (HAM10000)"
+    },
+    {
+        "timestamp": "2026-02-22T15:48:36.916458",
+        "filepath": "C:\\Users\\lenovo\\OneDrive\\Desktop\\HACKATHON\\output\\audit_uploads\\1771755516_calm-orange-cat-0410-5700096.jpg",
+        "original_filename": "calm-orange-cat-0410-5700096.jpg",
+        "true_label": "unknown",
+        "pred1": "mel",
+        "pred2": "bkl",
+        "confidence": 95.58,
+        "mst_tone": "5",
+        "model_used": "Clinical (HAM10000)"
+    },
+    {
+        "timestamp": "2026-02-22T15:48:47.495307",
+        "filepath": "C:\\Users\\lenovo\\OneDrive\\Desktop\\HACKATHON\\output\\audit_uploads\\1771755527_ISIC_0029308.jpg",
+        "original_filename": "ISIC_0029308.jpg",
+        "true_label": "bkl",
+        "pred1": "bkl",
+        "pred2": "mel",
+        "confidence": 95.44,
+        "mst_tone": "6",
+        "model_used": "Clinical (HAM10000)"
+    },
+    {
+        "timestamp": "2026-02-22T15:49:12.251222",
+        "filepath": "C:\\Users\\lenovo\\OneDrive\\Desktop\\HACKATHON\\output\\audit_uploads\\1771755552_ISIC_0029308.jpg",
+        "original_filename": "ISIC_0029308.jpg",
+        "true_label": "bkl",
+        "pred1": "bkl",
+        "pred2": "mel",
+        "confidence": 95.44,
+        "mst_tone": "6",
+        "model_used": "Clinical (HAM10000)"
     }
 ]
