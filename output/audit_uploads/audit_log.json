@@ -1,0 +1,79 @@
+[
+    {
+        "timestamp": "2026-02-22T15:40:42.663018",
+        "filepath": "C:\\Users\\lenovo\\OneDrive\\Desktop\\HACKATHON\\output\\audit_uploads\\1771755042_ISIC_0029328.jpg",
+        "original_filename": "ISIC_0029328.jpg",
+        "true_label": "nv",
+        "pred1": "nv",
+        "pred2": "mel",
+        "confidence": 53.99,
+        "mst_tone": "3",
+        "model_used": "Clinical (HAM10000)"
+    },
+    {
+        "timestamp": "2026-02-22T15:41:00.371850",
+        "filepath": "C:\\Users\\lenovo\\OneDrive\\Desktop\\HACKATHON\\output\\audit_uploads\\1771755060_ISIC_0029330.jpg",
+        "original_filename": "ISIC_0029330.jpg",
+        "true_label": "nv",
+        "pred1": "nv",
+        "pred2": "bkl",
+        "confidence": 100.0,
+        "mst_tone": "2",
+        "model_used": "Clinical (HAM10000)"
+    },
+    {
+        "timestamp": "2026-02-22T15:41:02.628719",
+        "filepath": "C:\\Users\\lenovo\\OneDrive\\Desktop\\HACKATHON\\output\\audit_uploads\\1771755062_ISIC_0029318.jpg",
+        "original_filename": "ISIC_0029318.jpg",
+        "true_label": "mel",
+        "pred1": "mel",
+        "pred2": "akiec",
+        "confidence": 76.68,
+        "mst_tone": "4",
+        "model_used": "Clinical (HAM10000)"
+    },
+    {
+        "timestamp": "2026-02-22T15:41:06.776247",
+        "filepath": "C:\\Users\\lenovo\\OneDrive\\Desktop\\HACKATHON\\output\\audit_uploads\\1771755066_ISIC_0029422.jpg",
+        "original_filename": "ISIC_0029422.jpg",
+        "true_label": "nv",
+        "pred1": "nv",
+        "pred2": "mel",
+        "confidence": 54.81,
+        "mst_tone": "2",
+        "model_used": "Clinical (HAM10000)"
+    },
+    {
+        "timestamp": "2026-02-22T15:41:11.910083",
+        "filepath": "C:\\Users\\lenovo\\OneDrive\\Desktop\\HACKATHON\\output\\audit_uploads\\1771755071_ISIC_0029515.jpg",
+        "original_filename": "ISIC_0029515.jpg",
+        "true_label": "bcc",
+        "pred1": "mel",
+        "pred2": "vasc",
+        "confidence": 57.47,
+        "mst_tone": "3",
+        "model_used": "Clinical (HAM10000)"
+    },
+    {
+        "timestamp": "2026-02-22T15:41:20.498965",
+        "filepath": "C:\\Users\\lenovo\\OneDrive\\Desktop\\HACKATHON\\output\\audit_uploads\\1771755080_ISIC_0029413.jpg",
+        "original_filename": "ISIC_0029413.jpg",
+        "true_label": "bkl",
+        "pred1": "bkl",
+        "pred2": "mel",
+        "confidence": 71.42,
+        "mst_tone": "5",
+        "model_used": "Clinical (HAM10000)"
+    },
+    {
+        "timestamp": "2026-02-22T15:42:40.544118",
+        "filepath": "C:\\Users\\lenovo\\OneDrive\\Desktop\\HACKATHON\\output\\audit_uploads\\1771755160_170216.jpg",
+        "original_filename": "170216.jpg",
+        "true_label": "unknown",
+        "pred1": "nv",
+        "pred2": "mel",
+        "confidence": 60.21,
+        "mst_tone": "7",
+        "model_used": "Clinical (HAM10000)"
+    }
+]

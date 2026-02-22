@@ -7,17 +7,39 @@ import torchvision.transforms as transforms
 from PIL import Image
 import sys
 import pandas as pd
+import streamlit.components.v1 as components
+import threading
+import fiftyone as fo
 
 # Add local paths for modules
-sys.path.append(os.path.join(os.getcwd(), "core"))
-sys.path.append(os.path.join(os.getcwd(), "models"))
-sys.path.append(os.path.join(os.getcwd(), "research", "skintone"))
+# The following path appends are consolidated and made more robust
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from model import get_resnet50_model
-from dullrazor import apply_dullrazor
-from gradcam_engine import generate_cam
-from skintone import estimate_skin_tone
-from skin import process_image
+from models.model import get_resnet50_model
+from core.dullrazor import apply_dullrazor
+from core.gradcam_engine import generate_cam
+from research.skintone.skintone import estimate_skin_tone
+from core.skin import process_image
+from core.audit_logger import log_inference
+from research.launch_audit_hub import load_and_sync_dataset
+
+# --- FiftyOne Background Integration ---
+@st.cache_resource
+def start_fiftyone_server():
+    """Starts the FiftyOne app server in the background so Streamlit can iframe it."""
+    dataset = load_and_sync_dataset()
+    if dataset is None:
+        if "DermaTrace_Live_Audit" in fo.list_datasets():
+            dataset = fo.load_dataset("DermaTrace_Live_Audit")
+        else:
+            dataset = fo.Dataset("DermaTrace_Live_Audit")
+        
+    print("Starting integrated FiftyOne server on port 5152...")
+    session = fo.launch_app(dataset, port=5152, address="localhost")
+    return session
+
+session = start_fiftyone_server()
+
 
 # --- Configuration ---
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -161,9 +183,16 @@ with st.sidebar:
     )
     
     st.markdown("---")
-    if st.button("FiftyOne Audit Hub"):
-        st.info("Directing to Audit Cluster...")
-        st.markdown("[Open Dashboard](http://localhost:5151)")
+    st.subheader("Live Audit Hub")
+    if st.button("Refresh Dataset"):
+        # Tell the existing session to reload the dataset from disk
+        ds = load_and_sync_dataset()
+        if ds is not None:
+            session.dataset = ds
+        st.rerun()
+            
+    # Embed FiftyOne UI directly in the sidebar
+    components.iframe("http://localhost:5152", height=600, scrolling=True)
 
 # --- Logic for Model Path ---
 if not model_choice:
@@ -234,6 +263,18 @@ if uploaded_file is not None:
             inv_names = {v: k for k, v in FULL_NAMES.items()}
             actual_val = inv_names[actual_label_name].upper()
             match_source = "Manual"
+            
+        # 5. Log the Inference to FiftyOne Audit Hub
+        log_inference(
+            image_bytes=file_bytes,
+            filename=uploaded_file.name,
+            true_label=actual_val,
+            pred1_label=p1_name,
+            pred2_label=p2_name,
+            conf1=conf,
+            mst_score=mst_score,
+            model_name=model_type
+        )
             
         # --- Top Metrics Bar ---
         st.markdown("---")
