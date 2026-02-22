@@ -9,10 +9,7 @@ import sys
 import pandas as pd
 import streamlit.components.v1 as components
 import threading
-import fiftyone as fo
-
 # Add local paths for modules
-# The following path appends are consolidated and made more robust
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from models.model import get_resnet50_model
@@ -20,30 +17,12 @@ from core.dullrazor import apply_dullrazor
 from core.gradcam_engine import generate_cam
 from research.skintone.skintone import estimate_skin_tone
 from core.skin import process_image
-from core.audit_logger import log_inference
-from research.launch_audit_hub import load_and_sync_dataset
 
-# --- FiftyOne Background Integration ---
-@st.cache_resource
-def start_fiftyone_server():
-    """Starts the FiftyOne app server in the background so Streamlit can iframe it."""
-    dataset = load_and_sync_dataset()
-    if dataset is None:
-        if "DermaTrace_Live_Audit" in fo.list_datasets():
-            dataset = fo.load_dataset("DermaTrace_Live_Audit")
-        else:
-            dataset = fo.Dataset("DermaTrace_Live_Audit")
-        
-    print("Starting integrated FiftyOne server on port 5152...")
-    session = fo.launch_app(dataset, port=5152, address="localhost")
-    return session
-
-session = start_fiftyone_server()
-
+# --- Configuration paths ---
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # --- Configuration ---
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 CLASS_MAP = {0: 'nv', 1: 'mel', 2: 'bkl', 3: 'bcc', 4: 'akiec', 5: 'vasc', 6: 'df'}
 FULL_NAMES = {
     'nv': 'Melanocytic Nevi (Mole)',
@@ -172,7 +151,7 @@ with st.sidebar:
     model_type = "Non-Clinical (Fitzpatrick)" if model_choice else "Clinical (HAM10000)"
     
     st.markdown("---")
-    uploaded_file = st.file_uploader("Upload Lesion Image", type=['jpg', 'png', 'jpeg'])
+    uploaded_file = st.file_uploader("Upload Lesion Image", type=['jpg', 'png', 'jpeg'], key="uploader_top")
     
     st.markdown("---")
     st.subheader("📊 Ground Truth")
@@ -183,16 +162,6 @@ with st.sidebar:
     )
     
     st.markdown("---")
-    st.subheader("Live Audit Hub")
-    if st.button("Refresh Dataset"):
-        # Tell the existing session to reload the dataset from disk
-        ds = load_and_sync_dataset()
-        if ds is not None:
-            session.dataset = ds
-        st.rerun()
-            
-    # Embed FiftyOne UI directly in the sidebar
-    components.iframe("http://localhost:5152", height=600, scrolling=True)
 
 # --- Logic for Model Path ---
 if not model_choice:
@@ -264,17 +233,7 @@ if uploaded_file is not None:
             actual_val = inv_names[actual_label_name].upper()
             match_source = "Manual"
             
-        # 5. Log the Inference to FiftyOne Audit Hub
-        log_inference(
-            image_bytes=file_bytes,
-            filename=uploaded_file.name,
-            true_label=actual_val,
-            pred1_label=p1_name,
-            pred2_label=p2_name,
-            conf1=conf,
-            mst_score=mst_score,
-            model_name=model_type
-        )
+        # 5. [Removed FiftyOne Logging]
             
         # --- Top Metrics Bar ---
         st.markdown("---")
@@ -327,112 +286,3 @@ if uploaded_file is not None:
 else:
     st.info("👋 **Welcome to DermaTrace.ai.** Upload a high-resolution lesion scan in the sidebar to initiate diagnostic analysis.")
     st.image("https://i.imgur.com/vHqY7Zq.png", use_container_width=True)
-    # Landing State
-    st.info("👋 Welcome to DermaTrace.ai. Please upload a high-resolution lesion image in the sidebar to begin analysis.")
-    st.image("https://i.imgur.com/vHqY7Zq.png", use_container_width=True) # Placeholder dashboard graphic
-import PIL.Image
-
-# --- 1. EMERGENCY IMPORT LOGIC ---
-# This prevents the app from crashing even if Anwesh's functions have different names
-try:
-    from core.dullrazor import preprocess_image as hair_remover
-except ImportError:
-    try:
-        from core.dullrazor import hair_removal as hair_remover
-    except ImportError:
-        def hair_remover(image):
-            return image  # Fallback: returns original image
-
-try:
-    from core.gradcam_engine import generate_heatmap as heatmap_gen
-except ImportError:
-    def heatmap_gen(image):
-        return image  # Fallback: returns original image
-
-# --- 2. PAGE CONFIGURATION ---
-st.set_page_config(page_title="Skin AI Diagnostic", layout="wide", page_icon="🩺")
-
-# Custom CSS for UI polish
-st.markdown("""
-    <style>
-    .main { background-color: #f8f9fa; }
-    .stMetric { background-color: #ffffff; padding: 15px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-    </style>
-    """, unsafe_allow_html=True)
-
-# --- 3. SIDEBAR SETUP ---
-with st.sidebar:
-    st.title("🏥 Navigation")
-    
-    st.subheader("System Status")
-    if os.path.exists("models"):
-        st.success("✅ AI Models Loaded")
-    else:
-        st.warning("⏳ Syncing Models...")
-    
-    st.divider()
-    
-    st.subheader("Settings")
-    st.info("Role: Aditya (UI/UX lead)")
-    
-    uploaded_file = st.file_uploader("Upload Lesion Image", type=['jpg', 'png', 'jpeg'])
-    
-    # Handles the assets/assests folder name discrepancy
-    asset_path = "assets/sample.webp" if os.path.exists("assets") else "assests/sample.webp"
-    if os.path.exists(asset_path):
-        st.image(asset_path, caption="Example: Clear Scan", use_container_width=True)
-
-# --- 4. MAIN HEADER ---
-st.title("🩺 Skin Cancer Detection & Grad-CAM Analysis")
-st.caption("Advanced AI diagnostic dashboard for clinical decision support.")
-
-# --- 5. INTERACTIVE USER GUIDE ---
-with st.expander("📘 How to use this Dashboard"):
-    cols = st.columns(4)
-    cols[0].markdown("**1. Upload**\nDrop image in sidebar")
-    cols[1].markdown("**2. Clean**\nAI removes hair/rulers")
-    cols[2].markdown("**3. Analyze**\nHeatmap shows triggers")
-    cols[3].markdown("**4. Report**\nCheck diagnostic risk")
-
-st.divider()
-
-# --- 6. ANALYSIS SECTION ---
-col1, col2 = st.columns([1, 1], gap="large")
-
-with col1:
-    st.subheader("📸 Clinical Input")
-    if uploaded_file:
-        st.image(uploaded_file, caption="Source Image Received", use_container_width=True)
-        
-        # FIXED INDENTATION HERE
-        if st.button("✨ Run Pre-processing"):
-            with st.spinner("Removing artifacts..."):
-                cleaned_img = hair_remover(uploaded_file) 
-                st.image(cleaned_img, caption="Cleaned Clinical Image", use_container_width=True)
-                st.success("Pre-processing complete!")
-    else:
-        st.info("Upload a scan from the sidebar to begin.")
-
-with col2:
-    st.subheader("🔍 Interpretability (Grad-CAM)")
-    if uploaded_file:
-        with st.spinner("Generating Heatmap..."):
-            heatmap = heatmap_gen(uploaded_file)
-            st.image(heatmap, caption="AI Heatmap: Identifying key features", use_container_width=True)
-            st.toast("Feature analysis complete.")
-    else:
-        st.info("The AI heatmap will appear here after processing.")
-
-# --- 7. RESULTS SECTION ---
-st.divider()
-st.subheader("🔬 AI Diagnostic Analysis")
-m1, m2, m3 = st.columns(3)
-
-if uploaded_file:
-    m1.metric("Diagnosis", "Processing...", delta="Detecting Type")
-    m2.metric("Confidence", "Analyzing", delta="Score")
-    m3.metric("Risk Level", "Scanning", delta="Urgency")
-else:
-    m1.metric("Diagnosis", "Pending", delta="Waiting for input")
-    m2.metric("Confidence", "0%", delta=None)
-    m3.metric("Risk Level", "N/A", delta=None)
